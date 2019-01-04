@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:simple_permissions/simple_permissions.dart';
 
 import 'preference_manager.dart';
 
@@ -84,7 +83,7 @@ class MapsPageState extends State<MapsPage> {
         elevation: 4.0,
         backgroundColor: Colors.lightBlue,
         child: Icon(Icons.pin_drop),
-        onPressed: _checkLocationPermission);
+        onPressed: _recordUserLocation);
 
     if (Theme.of(context).platform == TargetPlatform.iOS) {
       floatingButton =
@@ -155,36 +154,16 @@ class MapsPageState extends State<MapsPage> {
   }
 
   void _onMapCreated(GoogleMapController controller) async {
-    bool isPermissionGranted =
-        await SimplePermissions.checkPermission(Permission.AccessFineLocation);
+    final permissionStatus =
+        await Geolocator().checkGeolocationPermissionStatus();
     setState(() {
       _mapController = controller;
-      if (isPermissionGranted) {
+      if (permissionStatus == GeolocationStatus.granted) {
         _mapController
             .updateMapOptions(GoogleMapOptions(myLocationEnabled: true));
       }
       _animateCamera(_lat, _lon);
     });
-  }
-
-  void _checkLocationPermission() async {
-    PermissionStatus status = await SimplePermissions.getPermissionStatus(
-        Permission.AccessFineLocation);
-    switch (status) {
-      case PermissionStatus.authorized:
-        _recordUserLocation();
-        break;
-      case PermissionStatus.denied:
-      case PermissionStatus.notDetermined:
-        status = await SimplePermissions.requestPermission(
-            Permission.AccessFineLocation);
-        if (status == PermissionStatus.authorized) {
-          _recordUserLocation();
-        }
-        break;
-      default:
-        break;
-    }
   }
 
   void _recordUserLocation() async {
