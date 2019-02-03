@@ -44,7 +44,7 @@ class MapsPageState extends State<MapsPage> {
       _address = address;
       _lat = lat;
       _lon = lon;
-      _animateCamera(_lat, _lon);
+      _moveCamera(_lat, _lon);
 
       _latList = latList;
       _lonList = lonList;
@@ -143,7 +143,12 @@ class MapsPageState extends State<MapsPage> {
           Expanded(
             child: Stack(
               children: <Widget>[
-                GoogleMap(onMapCreated: _onMapCreated),
+                GoogleMap(
+                  onMapCreated: _onMapCreated,
+                  initialCameraPosition:
+                      CameraPosition(target: LatLng(_lat, _lon)),
+                  myLocationEnabled: true,
+                ),
                 floatingButton
               ],
             ),
@@ -154,15 +159,9 @@ class MapsPageState extends State<MapsPage> {
   }
 
   void _onMapCreated(GoogleMapController controller) async {
-    final permissionStatus =
-        await Geolocator().checkGeolocationPermissionStatus();
     setState(() {
       _mapController = controller;
-      if (permissionStatus == GeolocationStatus.granted) {
-        _mapController
-            .updateMapOptions(GoogleMapOptions(myLocationEnabled: true));
-      }
-      _animateCamera(_lat, _lon);
+      _moveCamera(_lat, _lon);
     });
   }
 
@@ -185,9 +184,9 @@ class MapsPageState extends State<MapsPage> {
     _refreshData();
   }
 
-  void _animateCamera(double lat, double lon) {
+  void _moveCamera(double lat, double lon) {
     if (_mapController == null) return;
-    _mapController.animateCamera(CameraUpdate.newCameraPosition(
+    _mapController.moveCamera(CameraUpdate.newCameraPosition(
         CameraPosition(target: LatLng(lat, lon), zoom: 17)));
     _mapController.clearMarkers();
     _mapController.addMarker(MarkerOptions(
