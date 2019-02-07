@@ -44,7 +44,7 @@ class MapsPageState extends State<MapsPage> {
       _address = address;
       _lat = lat;
       _lon = lon;
-      _moveCamera(_lat, _lon);
+      _animateCamera(_lat, _lon);
 
       _latList = latList;
       _lonList = lonList;
@@ -161,7 +161,7 @@ class MapsPageState extends State<MapsPage> {
   void _onMapCreated(GoogleMapController controller) async {
     setState(() {
       _mapController = controller;
-      _moveCamera(_lat, _lon);
+      _animateCamera(_lat, _lon);
     });
   }
 
@@ -184,9 +184,9 @@ class MapsPageState extends State<MapsPage> {
     _refreshData();
   }
 
-  void _moveCamera(double lat, double lon) {
+  void _animateCamera(double lat, double lon) {
     if (_mapController == null) return;
-    _mapController.moveCamera(CameraUpdate.newCameraPosition(
+    _mapController.animateCamera(CameraUpdate.newCameraPosition(
         CameraPosition(target: LatLng(lat, lon), zoom: 17)));
     _mapController.clearMarkers();
     _mapController.addMarker(MarkerOptions(
